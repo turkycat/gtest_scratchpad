@@ -8,23 +8,32 @@ project(GTest_Scratchpad)
 #
 
 # add a location for CMake to look for header files
-include_directories(./include)
+include_directories(${CMAKE_SOURCE_DIR}/include)
 
 # we have some source files that need built into objects and linked. We will build them as a library and link
 add_library(num STATIC ${CMAKE_SOURCE_DIR}/src/num.cpp)
 
+message(STATUS "Are we building tests and dependent libraries?")
 if(build_tests)
-  message(STATUS "building test libraries and tests")
+  message(STATUS "YES - Building test libraries and tests")
+
+  # googletest has their own CMake files, so simply reference the directory to build the entire library
   add_subdirectory(deps/gtest)
 
-#
-# warning: no effort was made to make this pretty. It is a proof of concept.
-#
+  # our test files will reference gtest/gtest.h, so add an include directory for that.
   include_directories(${CMAKE_SOURCE_DIR}/deps/gtest/googletest/include)
-  add_executable(num_tests ${CMAKE_SOURCE_DIR}/tests/num_unittests.cpp ${CMAKE_SOURCE_DIR}/deps/gtest/googletest/src/gtest_main.cc)
-  target_link_libraries(num_tests gtest num)
+
+  # grab a list of all source files in the test directory, store as {TESTFILES}
+  file(GLOB TESTFILES test/*.cpp)
+
+  # build all test files into a single executable, this will include our testmain.cpp
+  add_executable(runtests ${TESTFILES})
+
+  #finally, link runtests executable with the gtest library and our custom library.
+  target_link_libraries(runtests gtest num)
+
 else()
-  message(STATUS "not building tests or test libraries")
+  message(STATUS "NO - not building tests or test libraries")
 endif()
 
 # this produces the main executable, linked with the libraries produced in /src/
