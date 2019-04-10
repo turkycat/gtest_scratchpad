@@ -13,6 +13,13 @@ include_directories(./include)
 # we have some source files that need built into objects and linked. We will build them as a library and link
 add_library(num STATIC ${CMAKE_SOURCE_DIR}/src/num.cpp)
 
+if(BUILD_TESTS)
+  message(STATUS "building test libraries and tests")
+  add_subdirectory(deps/gtest)
+else()
+  message(STATUS "not building tests or test libraries")
+endif()
+
 # this produces the main executable, linked with the libraries produced in /src/
 add_executable(main main.cpp)
 target_link_libraries(main num)
