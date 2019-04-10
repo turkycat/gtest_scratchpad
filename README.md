@@ -26,3 +26,14 @@ cd build
 cmake ..
 make
 ```
+
+##### Building Tests
+
+In order to build the unit tests in addition to the test code, we will modify only one command of our steps above.
+
+```
+mkdir build
+cd build
+cmake -Dbuild_tests=true ..
+make
+```
