@@ -53,6 +53,7 @@ private:
     node->_element = nullptr;
     delete(node);
     _count--;
+    return toReturn;
   }
 
 public:
@@ -117,7 +118,7 @@ public:
 
     Node<T>* unlink = _head;
     _head = _head->_next;
-    if(_count < 1) _tail = nullptr;
+    if(_count < 2) _tail = nullptr;
 
     return removeAndDelete(unlink);
   }
@@ -155,16 +156,34 @@ public:
 
   // map
   template <typename F>
-  MapReducer* map(F func)
+  MapReducer<T>* map(F func)
   {
-    
+    MapReducer<T>* mapped = new MapReducer<T>();
+    Node<T>* current = _head;
+    while(current != nullptr)
+    {
+      T* toAdd = (T*) malloc(sizeof(T));
+      *toAdd = func(*current->_element);
+      mapped->addLast(toAdd);
+      current = current->_next;
+    }
+    return mapped;
   }
 
   // reduce
   template <typename G>
-  MapReducer* reduce(G func)
+  MapReducer<T>* reduce(G func)
   {
-
+    MapReducer<T>* reduced = new MapReducer<T>();
+    Node<T>* current = _head;
+    while(current != nullptr)
+    {
+      if(func(*(current->_element)))
+        reduced->addLast(current->_element);
+      
+      current = current->_next;
+    }
+    return reduced;
   }
 };
 
