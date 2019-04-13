@@ -10,6 +10,13 @@
  * mapped function applied to each member (map) or a list reduced by the members not matching
  * the reduction (reduce)
  * 
+ * this class stores pointers to elements, and the user of this class is responsible for the memory
+ * they allocate.
+ * 
+ * Special note: this is a 'fun' class to show off some of the nice features of google test.
+ * this makes no claim to be a 'real' mapreduce implementation, as it does not rely on data streams
+ * and, quite frankly, would experience hilariously bad memory leaks if you tried to string
+ * map and reduce calls together as a chain in typical map-reduce fashion. Bear with me on this one.
  */
 
 template <typename T>
@@ -154,7 +161,7 @@ public:
     return _tail->_element;
   }
 
-  // map
+  // map returns a -new- MapReducer with only the elements that satisfy the given function
   template <typename F>
   MapReducer<T>* map(F func)
   {
@@ -162,15 +169,13 @@ public:
     Node<T>* current = _head;
     while(current != nullptr)
     {
-      T* toAdd = (T*) malloc(sizeof(T));
-      *toAdd = func(*current->_element);
-      mapped->addLast(toAdd);
+      mapped->addLast(func(current->_element));
       current = current->_next;
     }
     return mapped;
   }
 
-  // reduce
+  // reduce returns a -new- MapReducer with only the elements that satisfy the given function
   template <typename G>
   MapReducer<T>* reduce(G func)
   {
@@ -178,7 +183,7 @@ public:
     Node<T>* current = _head;
     while(current != nullptr)
     {
-      if(func(*(current->_element)))
+      if(func(current->_element))
         reduced->addLast(current->_element);
       
       current = current->_next;

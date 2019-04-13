@@ -1,3 +1,4 @@
+#include <num.h>
 #include "mapreducer.h"
 #include "gtest/gtest.h"
 #include <malloc.h>
@@ -5,27 +6,24 @@
 class MapReducerFixture : public testing::Test
 {
 protected:
-  MapReducer<int> m0;
-  MapReducer<int> m1;
-  MapReducer<int> m2;
-  MapReducer<int> bigMap;
-  int *one;
-  int *two;
+  MapReducer<Num> m0;
+  MapReducer<Num> m1;
+  MapReducer<Num> m2;
+  MapReducer<Num> bigMap;
+  Num *one;
+  Num *two;
 
   void SetUp() override
   {
-    one = (int*)malloc(sizeof(int));
-    two = (int*)malloc(sizeof(int));
-    *one = 1;
-    *two = 2;
+    one = new Num(1);
+    two = new Num(2);
     m1.addFirst(one);
     m2.addLast(one);
     m2.addLast(two);
 
     for(int i = 0; i < 43; i++)
     {
-      int* n = (int*) malloc(sizeof(int));
-      *n = i;
+      Num *n = new Num(i);
       bigMap.addLast(n);
     }
   }
@@ -36,7 +34,7 @@ protected:
     free(two);
     while(bigMap.size())
     {
-      int* n = bigMap.getFirst();
+      Num *n = bigMap.getFirst();
       free(n);
     }
   }
@@ -44,24 +42,14 @@ protected:
 
 
 
-int DoubleIt(int n)
+Num* DoubleIt(Num *n)
 {
-  return 2*n;
+  return new Num(n->getNum() * 2);
 }
 
-int Half(int n)
+bool isEven(Num *n)
 {
-  return n/2;
-}
-
-bool isOdd(int n)
-{
-  return (n % 2) > 0;
-}
-
-bool isEven(int n)
-{
-  return !isOdd(n);
+  return (n->getNum() % 2) == 0;
 }
 
 TEST_F(MapReducerFixture, testEmptyMap)
@@ -109,15 +97,15 @@ TEST_F(MapReducerFixture, testGetFirst)
   EXPECT_EQ(2, m2.size());
 
   //get last item, verify it, validate size change
-  ASSERT_EQ(1, *(m2.getFirst()));
+  ASSERT_EQ(1, m2.getFirst()->getNum());
   EXPECT_EQ(1, m2.size());
 
   //get last item, verify it, validate size change
-  ASSERT_EQ(2, *(m2.getFirst()));
+  ASSERT_EQ(2, m2.getFirst()->getNum());
   EXPECT_EQ(0, m2.size());
 
   //verify the items removed haven't been deleted
-  ASSERT_EQ(1, *one);
+  ASSERT_EQ(1, one->getNum());
 }
 
 TEST_F(MapReducerFixture, testGetLast)
@@ -126,15 +114,15 @@ TEST_F(MapReducerFixture, testGetLast)
   EXPECT_EQ(2, m2.size());
 
   //get last item, verify it, validate size change
-  ASSERT_EQ(2, *(m2.getLast()));
+  ASSERT_EQ(2, m2.getLast()->getNum());
   EXPECT_EQ(1, m2.size());
 
   //get last item, verify it, validate size change
-  ASSERT_EQ(1, *(m2.getLast()));
+  ASSERT_EQ(1, m2.getLast()->getNum());
   EXPECT_EQ(0, m2.size());
 
   //verify the items removed haven't been deleted
-  ASSERT_EQ(1, *one);
+  ASSERT_EQ(1, one->getNum());
 }
 
 TEST_F(MapReducerFixture, testPeekFirst)
@@ -143,11 +131,11 @@ TEST_F(MapReducerFixture, testPeekFirst)
   EXPECT_EQ(2, m2.size());
 
   //peek at the last item and verify the size did not change
-  ASSERT_EQ(1, *(m2.peekFirst()));
+  ASSERT_EQ(1, m2.peekFirst()->getNum());
   EXPECT_EQ(2, m2.size());
 
   //peek again, same item should be returned
-  ASSERT_EQ(1, *(m2.peekFirst()));
+  ASSERT_EQ(1, m2.peekFirst()->getNum());
   EXPECT_EQ(2, m2.size());
 }
 
@@ -157,50 +145,50 @@ TEST_F(MapReducerFixture, testPeekLast)
   EXPECT_EQ(2, m2.size());
 
   //peek at the last item and verify the size did not change
-  ASSERT_EQ(2, *(m2.peekLast()));
+  ASSERT_EQ(2, m2.peekLast()->getNum());
   EXPECT_EQ(2, m2.size());
 
   //peek again, same item should be returned
-  ASSERT_EQ(2, *(m2.peekLast()));
+  ASSERT_EQ(2, m2.peekLast()->getNum());
   EXPECT_EQ(2, m2.size());
 }
 
 TEST_F(MapReducerFixture, testMap)
 {
-  MapReducer<int>* ret = m2.map(DoubleIt);
+  MapReducer<Num>* ret = m2.map(DoubleIt);
   ASSERT_EQ(2, ret->size());
 
   while(ret->size())
   {
-    ASSERT_EQ(*m2.getFirst(), Half(*ret->getFirst()));  
+    ASSERT_EQ(m2.getFirst()->getNum(), ret->getFirst()->getNum() / 2);  
   }
 }
 
 TEST_F(MapReducerFixture, testMapBig)
 {
-  MapReducer<int>* ret = bigMap.map(DoubleIt);
+  MapReducer<Num>* ret = bigMap.map(DoubleIt);
   ASSERT_EQ(43, ret->size());
 
   while(ret->size())
   {
-    ASSERT_EQ(*bigMap.getFirst(), Half(*ret->getFirst()));
+    ASSERT_EQ(bigMap.getFirst()->getNum(), ret->getFirst()->getNum() / 2);
   }
 }
 
 TEST_F(MapReducerFixture, testReduce)
 {
-  MapReducer<int>* ret = m2.reduce(isEven);
+  MapReducer<Num>* ret = m2.reduce(isEven);
   ASSERT_EQ(1, ret->size());
-  EXPECT_EQ(2, *ret->getFirst());
+  EXPECT_EQ(2, ret->getFirst()->getNum());
 }
 
 TEST_F(MapReducerFixture, testReduceBig)
 {
-  MapReducer<int>* ret = bigMap.reduce(isEven);
+  MapReducer<Num>* ret = bigMap.reduce(isEven);
   ASSERT_EQ(22, ret->size());
   
   for(int i = 0; ret->size(); i+=2)
   {
-    ASSERT_EQ(i, *ret->getFirst());  
+    ASSERT_EQ(i, ret->getFirst()->getNum());  
   }
 }
