@@ -3,12 +3,13 @@
 
 class Num
 {
-  private:
+  protected:
     int _num;
   public:
     Num(int);
-    int getNum();
-    void setNum(int);
+    virtual ~Num();
+    virtual int getNum();
+    virtual void setNum(int);
 };
 
 #endif //__NUM_H__

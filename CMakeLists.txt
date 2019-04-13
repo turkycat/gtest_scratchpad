@@ -32,6 +32,14 @@ if(build_tests)
   #finally, link runtests executable with the gtest library and our custom library.
   target_link_libraries(runtests gtest num)
 
+  #
+  # Integration test target
+  #
+  include_directories(${CMAKE_SOURCE_DIR}/deps/gtest/googlemock/include)
+  include_directories(${CMAKE_SOURCE_DIR}/test/integration)
+  add_executable(integration test/integration/mapreduce_mocknum_integration.cpp)
+  target_link_libraries(integration gtest gmock num)
+
 else()
   message(STATUS "NO - not building tests or test libraries")
 endif()
