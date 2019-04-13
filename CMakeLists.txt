@@ -8,7 +8,7 @@ project(GTest_Scratchpad)
 #
 
 # add a location for CMake to look for header files
-include_directories(./include)
+include_directories(${CMAKE_SOURCE_DIR}/include)
 
 # we have some source files that need built into objects and linked. We will build them as a library and link
 add_library(num STATIC ${CMAKE_SOURCE_DIR}/src/num.cpp)
