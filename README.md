@@ -16,7 +16,15 @@ You must have CMake and Make installed. Run the following command once per machi
 sudo apt-get install cmake make
 ```
 
-##### Building Production Code
+### Building
+
+Simply execute the build script `build.sh` in the root directory.
+
+You may pass in `-c` or `--clean` to clear all build outputs.
+
+You may pass in `-t` or `--test` to build and run all tests automatically.
+
+##### Manually Building Production Code
 
 Navigate to the root directory of this repository in a terminal window and run the following commands.
 
@@ -27,7 +35,7 @@ cmake ..
 make
 ```
 
-##### Building Tests
+##### Manually Building Tests
 
 In order to build the unit tests in addition to the test code, we will modify only one command of our steps above.
 
